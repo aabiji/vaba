@@ -2,37 +2,41 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
+	"strings"
 
 	"golang.org/x/net/html"
 )
 
+// Return an io.Reader containing the html
+// of a DuckDuckGo search result page given a search query
 func getSearchResultPage(query string) (io.Reader, error) {
-	link := "https://duckduckgo.com/?q=%s&ia=web"
-	escapedQuery := url.QueryEscape(query)
-	searchLink := fmt.Sprintf(link, escapedQuery)
+	query = url.QueryEscape(query)
+	baseLink := "https://html.duckduckgo.com/html"
+	link := fmt.Sprintf("%s/?q=%s", baseLink, query)
 
-	client := &http.Client{}
-
-	request, err := http.NewRequest("GET", searchLink, nil)
+	request, err := http.NewRequest("GET", link, nil)
 	if err != nil {
 		return nil, err
 	}
+	// Trick DuckDuckGo into thinking we're a real
+	// user with a fake user Agent
+	fakeAgent := "'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'"
+	request.Header.Add("User-Agent", fakeAgent)
 
-	userAgent := "'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'"
-	request.Header.Add("User-Agent", userAgent)
-
+	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
 
 	if response.StatusCode != 200 {
-		return nil, errors.New("failed to get page")
+		msg := "status code : %d | failed to get page"
+		return nil, fmt.Errorf(msg, response.StatusCode)
 	}
 
 	content, err := io.ReadAll(response.Body)
@@ -43,18 +47,51 @@ func getSearchResultPage(query string) (io.Reader, error) {
 	return bytes.NewReader(content), nil
 }
 
-func findLinks(node *html.Node) {
+// Extract the real website url from the duckduckgo search result url
+func extractWebsiteLink(rawLink string) string {
+	link, _ := url.QueryUnescape(rawLink)
+
+	// Remove the prefix
+	prefix := "//duckduckgo.com/l/?uddg="
+	link = strings.Replace(link, prefix, "", -1)
+
+	// Remove everything after the regex pattern match
+	pattern := `\&rut=.*`
+	regex, _ := regexp.Compile(pattern)
+	linkParts := regex.Split(link, -1)
+
+	return linkParts[0]
+}
+
+// Scrape all the links to websites off the DuckDuckGo
+// search result page
+func getResultLinks(node *html.Node) []string {
+	var allLinks []string
+
 	if node.Type == html.ElementNode && node.Data == "a" {
-		fmt.Println(node.Data, node.Namespace, node.Attr)
+		isResultUrl := false
+		for _, attr := range node.Attr {
+			if attr.Key == "class" && attr.Val == "result__url" {
+				isResultUrl = true
+			}
+
+			if attr.Key == "href" && isResultUrl {
+				link := extractWebsiteLink(attr.Val)
+				allLinks = append(allLinks, link)
+			}
+		}
 	}
 
 	for next := node.FirstChild; next != nil; next = next.NextSibling {
-		findLinks(next)
+		links := getResultLinks(next)
+		allLinks = append(allLinks, links...)
 	}
+
+	return allLinks
 }
 
 func main() {
-	query := "please work"
+	query := "hello world"
 	htmlContent, err := getSearchResultPage(query)
 	if err != nil {
 		panic(err)
@@ -65,5 +102,8 @@ func main() {
 		panic(err)
 	}
 
-	findLinks(doc)
+	links := getResultLinks(doc)
+	for _, link := range links {
+		fmt.Println(link)
+	}
 }
