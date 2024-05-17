@@ -1,11 +1,10 @@
 Vaba
 
-**First steps**
-- URL encode a string
-- Assemble a direct link to a duckduckgo search result page
-- Download the page
-- Parse the html string into a tree of dom elements
-- Walk the tree to print out each element
+**Next steps**
+- Checking our list of scraped website links to see
+  if we can find vk.com
+- Scrape vk for links to epubs or pdfs
+- Spawn a new goroutine for each match we find
 
 Vaba is the app that helps you find and download free ebooks.
 It's like a search engine, you enter a search query and you'll
