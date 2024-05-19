@@ -1,9 +1,6 @@
 Vaba
 
 **Next steps**
-- Checking our list of scraped website links to see
-  if we can find vk.com
-- Scrape vk for links to epubs or pdfs
 - Spawn a new goroutine for each match we find
 
 Vaba is the app that helps you find and download free ebooks.
