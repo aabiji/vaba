@@ -31,7 +31,7 @@ func Search(query string) ([]string, error) {
 // Return an io.Reader containing the html
 // of a DuckDuckGo search result page given a search query
 func getSearchResultPage(query string) (io.Reader, error) {
-	query = url.QueryEscape(query)
+	query = url.QueryEscape(query) // URL encode the query
 	baseLink := "https://html.duckduckgo.com/html"
 	link := fmt.Sprintf("%s/?q=%s", baseLink, query)
 
@@ -65,7 +65,7 @@ func getSearchResultPage(query string) (io.Reader, error) {
 
 // Extract the real website url from the duckduckgo search result url
 func extractWebsiteLink(rawLink string) string {
-	link, _ := url.QueryUnescape(rawLink)
+	link, _ := url.QueryUnescape(rawLink) // URL deocde the query
 
 	// Remove the prefix
 	prefix := "//duckduckgo.com/l/?uddg="
@@ -73,7 +73,7 @@ func extractWebsiteLink(rawLink string) string {
 
 	// Remove everything after the regex pattern match
 	pattern := `\&rut=.*`
-	regex, _ := regexp.Compile(pattern)
+	regex := regexp.MustCompile(pattern)
 	linkParts := regex.Split(link, -1)
 
 	return linkParts[0]
@@ -84,6 +84,7 @@ func extractWebsiteLink(rawLink string) string {
 func getResultLinks(node *html.Node) []string {
 	var allLinks []string
 
+	// If we've found a link node
 	if node.Type == html.ElementNode && node.Data == "a" {
 		isResultUrl := false
 		for _, attr := range node.Attr {
