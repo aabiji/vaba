@@ -81,6 +81,10 @@ func vkGetFileLinks(document *html.Node) ([]string, error) {
 			return nil, err
 		}
 
+		if !strings.Contains(link, "doc") {
+			continue // Not a link to a file
+		}
+
 		fullLink := fmt.Sprintf("https://vk.com%s", link)
 		downloads = append(downloads, fullLink)
 	}
@@ -88,35 +92,48 @@ func vkGetFileLinks(document *html.Node) ([]string, error) {
 	return downloads, nil
 }
 
-func main() {
-	query := "shakespear"
+func getVKDownloadLinks(query string) ([]string, error) {
 	fmtQuery := fmt.Sprintf("%s epub vk", query)
 
 	links, err := searchDuckDuckGo(fmtQuery)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	links, err = filterLinks(`vk\.com`, links)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var fileDownloads []string
 	for _, link := range links {
 		document, err := GetPage(link)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
+		fmt.Println(link)
 		downloads, err := vkGetFileLinks(document)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
+
+		// We need some way to verify that links are what were looking for
+		// like they actually point to epub/pdf files
 		fileDownloads = append(fileDownloads, downloads...)
 	}
 
-	for _, download := range fileDownloads {
-		fmt.Println(download)
+	return fileDownloads, nil
+}
+
+func main() {
+	query := "shakespear"
+	links, err := getVKDownloadLinks(query)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, link := range links {
+		fmt.Println(link)
 	}
 }

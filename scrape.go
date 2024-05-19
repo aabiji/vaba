@@ -10,9 +10,8 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Return an io.Reader containing the html for the page
-func getPageHTML(link string) (io.Reader, error) {
-	request, err := http.NewRequest("GET", link, nil)
+func Request(link, method string) (*http.Response, error) {
+	request, err := http.NewRequest(method, link, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,6 +21,12 @@ func getPageHTML(link string) (io.Reader, error) {
 
 	client := &http.Client{}
 	response, err := client.Do(request)
+	return response, err
+}
+
+// Return an io.Reader containing the html for the page
+func getPageHTML(link string) (io.Reader, error) {
+	response, err := Request(link, "GET")
 	if err != nil {
 		return nil, err
 	}
