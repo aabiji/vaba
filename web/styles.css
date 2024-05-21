@@ -23,8 +23,11 @@
     display: flex;
     height: fit-content;
     width: 75%;
-    margin-bottom: 15px;
     box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;
+}
+
+#error {
+    color: red;
 }
 
 h1 {
