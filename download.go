@@ -11,7 +11,7 @@ import (
 
 // Extract the real website url from the duckduckgo search result url
 func extractWebsiteLink(rawLink string) string {
-	link, _ := url.QueryUnescape(rawLink) // URL deocde the query
+	link, _ := url.QueryUnescape(rawLink) // URL decode the query
 
 	// Remove the prefix
 	prefix := "//duckduckgo.com/l/?uddg="

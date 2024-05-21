@@ -1,4 +1,3 @@
-
 .content {
     width: 50%;
     height: 50%;
@@ -14,18 +13,18 @@
     flex-direction: column;
 }
 
+.logo {
+    width: auto;
+    height: 80px;
+    margin-bottom: 20px;
+}
+
 .inputs {
     display: flex;
     height: fit-content;
     width: 75%;
     margin-bottom: 15px;
     box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;
-}
-
-.logo {
-    width: auto;
-    height: 80px;
-    margin-bottom: 20px;
 }
 
 h1 {
@@ -51,9 +50,8 @@ input:active {
 }
 
 button img {
-    width: 35px;
-    height: 30px;
-    cursor: pointer;
+    width: 30px;
+    height: auto;
 }
 
 button {
@@ -67,6 +65,8 @@ button {
 
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
+
+    cursor: pointer;
 }
 
 button:hover,

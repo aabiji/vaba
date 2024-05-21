@@ -2,6 +2,7 @@ Vaba
 
 **Next steps**
 - Spawn a new goroutine for each match we find
+- Get a response from the backend and render the links
 
 Vaba is the app that helps you find and download free ebooks.
 It's like a search engine, you enter a search query and you'll
