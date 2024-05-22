@@ -1,20 +1,30 @@
 
-function renderLinks(links) {
-    const div = document.getElementById("links");
+const button  = document.getElementById("search");
+const query   = document.getElementById("query");
+const message = document.getElementById("error");
+const results = document.getElementById("results");
+const loader  = document.getElementById("loader");
+
+const show = (element) => element.style.display = "block";
+const hide = (element) => element.style.display = "none";
+
+const renderLinks = (links) => {
     for (let link of links) {
         const a = document.createElement("a");
         a.href = link;
-        a.innerHTML = "link"; // TODO: change this
-        div.appendChild(a);
+        a.innerHTML = link.split("?")[0];
+        results.appendChild(a);
     }
 }
 
-// Call the /search endpoint on button click
-const button = document.getElementById("search");
-const query = document.getElementById("query");
-button.onclick = () => {
-    // TODO: change this back to localhost
-    const url = "https://cuddly-barnacle-45xjjqj5x763jr5r-8080.app.github.dev/search";
+const search = () => {
+    if (query.value.length == 0) return;
+
+    hide(message);
+    hide(results);
+    show(loader);
+
+    const url = "http://localhost:8080/search";
     const data = {
         method: "POST",
         body: JSON.stringify({query: query.value})
@@ -23,12 +33,24 @@ button.onclick = () => {
     fetch(url, data)
         .then((response) => response.json())
         .then((json) => {
-            const errorMsg = document.getElementById("error");
-            if (json.error == undefined) {
-                errorMsg.innerHTML = "";
-                renderLinks(json.links);
+            hide(loader);
+
+            if (json.error != undefined) {
+                show(message);
+                message.innerHTML = json.error;
                 return;
             }
-            errorMsg.innerHTML = json.error;
+
+            show(results);
+            renderLinks(json.links);
         });
+}
+
+// Call the /search endpoint on button click
+// or on Enter
+button.onclick = () => search();
+query.onkeydown = (event) => {
+    if (event.key == "Enter") {
+        search();
+    }
 }

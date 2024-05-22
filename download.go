@@ -92,6 +92,7 @@ func vkGetFileLinks(document *html.Node) ([]string, error) {
 	return downloads, nil
 }
 
+// Internal error: href attribute not found
 func GetVKDownloadLinks(query string) ([]string, error) {
 	fmtQuery := fmt.Sprintf("%s epub vk", query)
 
