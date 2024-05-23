@@ -138,6 +138,13 @@ func GetFileLinks(query string, scraper SiteScraper) ([]Link, error) {
 		return nil, err
 	}
 
+	// Only consider the first 5 links
+	limit := 5
+	if len(links) < limit {
+		limit = len(links)
+	}
+	links = links[:limit]
+
 	var fileLinks []Link
 	for _, link := range links {
 		document, err := GetPage(link)

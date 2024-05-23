@@ -1,14 +1,19 @@
 .content {
     width: 50%;
     margin: 0 auto;
-    /* TODO: make the height 100% by default */
 
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-
     text-align: center;
+
+    height: 100%;
+    /* TODO: Center vertically, width of 100% and 
+     * keep all content on the page 
+     */
+
+    background-color: red;
 }
 
 .logo {
@@ -21,7 +26,7 @@
     display: flex;
     height: fit-content;
     width: 75%;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
     box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;
 }
 
@@ -30,6 +35,7 @@
     color: #858282;
     width: fit-content;
     margin: 0 auto;
+    margin-top: 15px;
 }
 
 .footer a {
@@ -75,14 +81,17 @@
 
 #results a {
     color: #005acd;
-    text-decoration: none;
-    display: inline-block;
     overflow: hidden;
+    text-decoration: none;
     text-overflow: ellipsis;
+    width: fit-content;
+    display: block;
+    margin: 0 auto;
 }
 
 body {
     font-family: Arial, sans-serif;
+    height: 100%;
 }
 
 input {
@@ -117,8 +126,6 @@ button {
 
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
-
-    cursor: pointer;
 }
 
 button:hover,
