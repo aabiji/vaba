@@ -9,6 +9,63 @@ import (
 	"golang.org/x/net/html"
 )
 
+type Link struct {
+	Href string
+	Name string
+}
+
+type SiteScraper interface {
+	// Return the keywords that will be appended to the end
+	// of the search query
+	Keywords() string
+
+	// Return the regex pattern used to filter search result links
+	// Only links matching the filter will be considered
+	Filter() string
+
+	// Scrape the html and return links to files
+	ScrapeFileLinks(*html.Node) ([]Link, error)
+}
+
+type VK struct{}
+
+func (vk VK) Filter() string {
+	return `vk\.com`
+}
+
+func (vk VK) Keywords() string {
+	return "vk"
+}
+
+func (vk VK) ScrapeFileLinks(document *html.Node) ([]Link, error) {
+	// Anchor elements with this class are links to file downloads
+	// Of course, the class name's subject to change
+	name := "SecondaryAttachment js-SecondaryAttachment SecondaryAttachment--interactive"
+	nodes := FilterHTML(document, "class", name)
+
+	var downloads []Link
+	for _, n := range nodes {
+		href, err := GetAttribute(n, "href")
+		if err != nil {
+			return nil, err
+		}
+
+		// The text associated to the link
+		names := FilterHTML(n, "class", "SecondaryAttachment__childrenText")
+		name := names[0].FirstChild.Data
+
+		if !strings.Contains(href, "doc") {
+			continue // Not a link to a file
+		}
+
+		fullHref := fmt.Sprintf("https://vk.com%s", href)
+		link := Link{Name: name, Href: fullHref}
+		downloads = append(downloads, link)
+	}
+
+	return downloads, nil
+}
+
 // Extract the real website url from the duckduckgo search result url
 func extractWebsiteLink(rawLink string) string {
 	link, _ := url.QueryUnescape(rawLink) // URL decode the query
@@ -68,61 +125,33 @@ func filterLinks(pattern string, links []string) ([]string, error) {
 	return filtered, nil
 }
 
-func vkGetFileLinks(document *html.Node) ([]string, error) {
-	// Anchor elements with this class are links to file downloads
-	// Of course, the class name's subject to change
-	name := "SecondaryAttachment js-SecondaryAttachment SecondaryAttachment--interactive"
-	nodes := FilterHTML(document, "class", name)
+func GetFileLinks(query string, scraper SiteScraper) ([]Link, error) {
+	formattedQuery := fmt.Sprintf("%s epub %s", query, scraper.Keywords())
 
-	var downloads []string
-	for _, n := range nodes {
-		link, err := GetAttribute(n, "href")
-		if err != nil {
-			return nil, err
-		}
-
-		if !strings.Contains(link, "doc") {
-			continue // Not a link to a file
-		}
-
-		fullLink := fmt.Sprintf("https://vk.com%s", link)
-		downloads = append(downloads, fullLink)
-	}
-
-	return downloads, nil
-}
-
-// Internal error: href attribute not found
-func GetVKDownloadLinks(query string) ([]string, error) {
-	fmtQuery := fmt.Sprintf("%s epub vk", query)
-
-	links, err := searchDuckDuckGo(fmtQuery)
+	links, err := searchDuckDuckGo(formattedQuery)
 	if err != nil {
 		return nil, err
 	}
 
-	links, err = filterLinks(`vk\.com`, links)
+	links, err = filterLinks(scraper.Filter(), links)
 	if err != nil {
 		return nil, err
 	}
 
-	var fileDownloads []string
+	var fileLinks []Link
 	for _, link := range links {
 		document, err := GetPage(link)
 		if err != nil {
 			return nil, err
 		}
 
-		fmt.Println(link)
-		downloads, err := vkGetFileLinks(document)
+		files, err := scraper.ScrapeFileLinks(document)
 		if err != nil {
 			return nil, err
 		}
 
-		// We need some way to verify that links are what were looking for
-		// like they actually point to epub/pdf files
-		fileDownloads = append(fileDownloads, downloads...)
+		fileLinks = append(fileLinks, files...)
 	}
 
-	return fileDownloads, nil
+	return fileLinks, nil
 }

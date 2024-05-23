@@ -11,8 +11,8 @@ const hide = (element) => element.style.display = "none";
 const renderLinks = (links) => {
     for (let link of links) {
         const a = document.createElement("a");
-        a.href = link;
-        a.innerHTML = link.split("?")[0];
+        a.href = link.Href;
+        a.innerHTML = link.Name;
         results.appendChild(a);
     }
 }

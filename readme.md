@@ -1,8 +1,17 @@
 Vaba
 
 **Next steps**
-- Spawn a new goroutine for each match we find
-- Get a response from the backend and render the links
+- Speed up searching
+  - Spawn a new goroutine for each match we find
+  - Use sync.WaitGroup
+- Is there a way to specify what duckduckgo result page?
+- Make searching DuckDuckGo deterministic
+- Make the UI better
+  - Make sure styling doesn't break on a mobile view
+  - Maybe center the search initially then move it to the top when
+    the results is shown
+- Scrape from Standard Ebooks
+  - Abstract away the GetDownloadLinks() function -- use an interface
 
 Vaba is the app that helps you find and download free ebooks.
 It's like a search engine, you enter a search query and you'll

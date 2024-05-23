@@ -44,13 +44,14 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with links
-	links, err := GetVKDownloadLinks(query)
+	vk := VK{}
+	links, err := GetFileLinks(query, vk)
 	if err != nil {
 		respondWithError(err, true, w)
 		return
 	}
 
-	response := map[string][]string{"links": links}
+	response := map[string][]Link{"links": links}
 	encoded, err := json.Marshal(response)
 	if err != nil {
 		respondWithError(err, true, w)
