@@ -1,6 +1,5 @@
 .content {
     width: 50%;
-    margin: 0 auto;
 
     display: flex;
     align-items: center;
@@ -9,11 +8,13 @@
     text-align: center;
 
     height: 100%;
-    /* TODO: Center vertically, width of 100% and 
-     * keep all content on the page 
-     */
+    position: sticky;
+    top: 50%;
+    left: 50%;
 
-    background-color: red;
+    /* Using pixel value for Y so that the entire div stays
+     * on the page */
+    transform: translate(-50%, calc(100vh / 5));
 }
 
 .logo {

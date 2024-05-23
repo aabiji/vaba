@@ -18,7 +18,6 @@ const renderLinks = (links) => {
 }
 
 const search = () => {
-    /*
     if (query.value.length == 0) return;
 
     hide(message);
@@ -45,14 +44,6 @@ const search = () => {
             show(results);
             renderLinks(json.links);
         });
-    */
-
-    let links = [];
-    for (let i = 0; i < 1000; i ++) {
-        links.push({ Href: "https://example.com", Name: "Hello" });
-    }
-    show(results);
-    renderLinks(links);
 }
 
 // Call the /search endpoint on button click
