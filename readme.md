@@ -1,12 +1,10 @@
 Vaba
 
+Almost done!
+
 **Next steps**
-- Is there a way to specify what duckduckgo result page?
-- Make searching DuckDuckGo deterministic
-- Make the UI better
-  - Make sure styling doesn't break on a mobile view
 - Scrape from Standard Ebooks
-  - Abstract away the GetDownloadLinks() function -- use an interface
+- Scrape from internet arcihve (maybe)
 
 Vaba is the app that helps you find and download free ebooks.
 It's like a search engine, you enter a search query and you'll

@@ -11,10 +11,14 @@ const hide = (element) => element.style.display = "none";
 const renderLinks = (links) => {
     results.innerHTML = "";
     for (let link of links) {
+        const li = document.createElement("li")
         const a = document.createElement("a");
+
         a.href = link.Href;
         a.innerHTML = link.Name;
-        results.appendChild(a);
+
+        li.appendChild(a);
+        results.appendChild(li);
     }
 }
 
