@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 
 	"golang.org/x/net/html"
 )
@@ -125,40 +126,85 @@ func filterLinks(pattern string, links []string) ([]string, error) {
 	return filtered, nil
 }
 
-func GetFileLinks(query string, scraper SiteScraper) ([]Link, error) {
+type Searcher struct {
+	group  sync.WaitGroup
+	mutex  sync.Mutex
+	errors chan error
+
+	pageMax   uint8
+	scrapers  []SiteScraper
+	FileLinks []Link
+}
+
+func NewSearcher() Searcher {
+	return Searcher{
+		pageMax:  3,
+		scrapers: []SiteScraper{VK{}},
+		errors:   make(chan error),
+	}
+}
+
+func (s *Searcher) processPage(link string, scraper SiteScraper) {
+	defer s.group.Done() // One less goroutine running
+
+	document, err := GetPage(link)
+	if err != nil {
+		s.errors <- err
+		return
+	}
+
+	files, err := scraper.ScrapeFileLinks(document)
+	if err != nil {
+		s.errors <- err
+		return
+	}
+
+	s.mutex.Lock()
+	s.FileLinks = append(s.FileLinks, files...)
+	s.mutex.Unlock()
+}
+
+func (s *Searcher) getFileLinks(query string, scraper SiteScraper) error {
 	formattedQuery := fmt.Sprintf("%s epub %s", query, scraper.Keywords())
 
-	links, err := searchDuckDuckGo(formattedQuery)
+	results, err := searchDuckDuckGo(formattedQuery)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	links, err = filterLinks(scraper.Filter(), links)
+	pageLinks, err := filterLinks(scraper.Filter(), results)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// Only consider the first 5 links
-	limit := 5
-	if len(links) < limit {
-		limit = len(links)
+	// Clamp the number of page limits
+	limit := int(s.pageMax)
+	if len(pageLinks) < limit {
+		limit = len(pageLinks)
 	}
-	links = links[:limit]
+	pageLinks = pageLinks[:limit]
 
-	var fileLinks []Link
-	for _, link := range links {
-		document, err := GetPage(link)
-		if err != nil {
-			return nil, err
+	// Process each page concurrently
+	for _, link := range pageLinks {
+		s.group.Add(1)
+		go s.processPage(link, scraper)
+	}
+
+	// Wait for all the goroutines to finish
+	// and return a potential error
+	s.group.Wait()
+	if len(s.errors) > 0 {
+		return <-s.errors
+	}
+
+	return nil
+}
+
+func (s *Searcher) Search(query string) error {
+	for _, scraper := range s.scrapers {
+		if err := s.getFileLinks(query, scraper); err != nil {
+			return err
 		}
-
-		files, err := scraper.ScrapeFileLinks(document)
-		if err != nil {
-			return nil, err
-		}
-
-		fileLinks = append(fileLinks, files...)
 	}
-
-	return fileLinks, nil
+	return nil
 }

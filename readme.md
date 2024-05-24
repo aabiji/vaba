@@ -1,15 +1,10 @@
 Vaba
 
 **Next steps**
-- Speed up searching
-  - Spawn a new goroutine for each match we find
-  - Use sync.WaitGroup
 - Is there a way to specify what duckduckgo result page?
 - Make searching DuckDuckGo deterministic
 - Make the UI better
   - Make sure styling doesn't break on a mobile view
-  - Maybe center the search initially then move it to the top when
-    the results is shown
 - Scrape from Standard Ebooks
   - Abstract away the GetDownloadLinks() function -- use an interface
 

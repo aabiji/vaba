@@ -19,12 +19,6 @@ func respondWithError(err error, isServerError bool, w http.ResponseWriter) {
 	}
 	encoded, _ := json.Marshal(response)
 	w.Write(encoded)
-
-	statusCode := 400
-	if isServerError {
-		statusCode = 500
-	}
-	w.WriteHeader(statusCode)
 }
 
 func respondWithJSON(w http.ResponseWriter, response map[string]any) {
@@ -33,8 +27,6 @@ func respondWithJSON(w http.ResponseWriter, response map[string]any) {
 		respondWithError(err, true, w)
 		return
 	}
-
-	w.WriteHeader(200)
 	w.Write(encoded)
 }
 
@@ -62,21 +54,21 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with links
-	vk := VK{}
-	links, err := GetFileLinks(query, vk)
+	// Respond with file links
+	s := NewSearcher()
+	err = s.Search(query)
 	if err != nil {
 		respondWithError(err, true, w)
 		return
 	}
 
-	if len(links) == 0 {
+	if len(s.FileLinks) == 0 {
 		err := errors.New("No file links found")
 		respondWithError(err, false, w)
 		return
 	}
 
-	response := map[string]any{"links": links}
+	response := map[string]any{"links": s.FileLinks}
 	respondWithJSON(w, response)
 }
 

@@ -9,6 +9,7 @@ const show = (element) => element.style.display = "block";
 const hide = (element) => element.style.display = "none";
 
 const renderLinks = (links) => {
+    results.innerHTML = "";
     for (let link of links) {
         const a = document.createElement("a");
         a.href = link.Href;
