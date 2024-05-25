@@ -30,7 +30,7 @@ func respondWithJSON(w http.ResponseWriter, response map[string]any) {
 	w.Write(encoded)
 }
 
-func getRequestJSON(w http.ResponseWriter, r *http.Request) (map[string]string, error) {
+func getRequestJSON(r *http.Request) (map[string]string, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func getRequestJSON(w http.ResponseWriter, r *http.Request) (map[string]string, 
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
-	values, err := getRequestJSON(w, r)
+	values, err := getRequestJSON(r)
 	if err != nil {
 		respondWithError(err, true, w)
 		return
